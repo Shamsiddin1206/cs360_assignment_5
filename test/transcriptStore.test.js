@@ -89,4 +89,28 @@ describe("TranscriptStore", () => {
     assert.equal(store.getGrade(studentID, "CS360"), undefined);
     assert.throws(() => store.getTranscript(studentID), /Student not found/);
   });
+
+  test("REF-201: addGrade and changeGrade share course and grade validation", () => {
+    const studentID = store.addStudent("Sara");
+    store.addGrade(studentID, "CS360", 80);
+
+    for (const method of ["addGrade", "changeGrade"]) {
+      assert.throws(() => store[method](studentID, "  ", 90), /^Error: Course name is required$/);
+      assert.throws(
+        () => store[method](studentID, "CS360", 85.5),
+        /^Error: Grade must be an integer from 0 to 100$/,
+      );
+      assert.throws(
+        () => store[method](studentID, "CS360", -1),
+        /^Error: Grade must be an integer from 0 to 100$/,
+      );
+      assert.throws(() => store[method](99, "CS360", 90), /^Error: Student not found: 99$/);
+    }
+    assert.deepEqual(store.changeGrade(studentID, " cs360 ", "100"), {
+      studentID,
+      course: "CS360",
+      grade: 100,
+    });
+    assert.equal(store.getGrade(studentID, " cs360 "), 100);
+  });
 });
