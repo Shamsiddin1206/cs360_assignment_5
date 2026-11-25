@@ -54,4 +54,14 @@ describe("TranscriptStore", () => {
     assert.deepEqual(store.getStudentIDs(), [firstID]);
     assert.throws(() => store.deleteStudent(secondID), /Student not found/);
   });
+
+  test("BUG-101: deleting a student also removes stored grades", () => {
+    const studentID = store.addStudent("Mira");
+    store.addGrade(studentID, "CS360", 88);
+
+    store.deleteStudent(studentID);
+
+    assert.equal(store.getGrade(studentID, "CS360"), undefined);
+    assert.throws(() => store.getTranscript(studentID), /Student not found/);
+  });
 });
