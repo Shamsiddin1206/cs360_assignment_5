@@ -55,6 +55,15 @@ describe("TranscriptStore", () => {
     assert.throws(() => store.deleteStudent(secondID), /Student not found/);
   });
 
+  test("BUG-103: name search trims whitespace and ignores case", () => {
+    const studentID = store.addStudent("Grace Lee");
+    store.addStudent("Grace Hall");
+
+    assert.deepEqual(store.getStudentIDs("  grace LEE  "), [studentID]);
+    assert.deepEqual(store.getStudentIDs("GRACE LEE"), [studentID]);
+    assert.equal(store.getTranscript(studentID).student.studentName, "Grace Lee");
+  });
+  
   test("BUG-102: rejects a second grade for the same student and course", () => {
     const studentID = store.addStudent("Omar");
     store.addGrade(studentID, "CS360", 70);
