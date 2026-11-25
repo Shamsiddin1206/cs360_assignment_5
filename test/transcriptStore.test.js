@@ -70,4 +70,14 @@ describe("TranscriptStore", () => {
       grade: 95,
     });
   });
+  
+  test("BUG-101: deleting a student also removes stored grades", () => {
+    const studentID = store.addStudent("Mira");
+    store.addGrade(studentID, "CS360", 88);
+
+    store.deleteStudent(studentID);
+
+    assert.equal(store.getGrade(studentID, "CS360"), undefined);
+    assert.throws(() => store.getTranscript(studentID), /Student not found/);
+  });
 });
